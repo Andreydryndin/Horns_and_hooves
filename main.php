@@ -7,31 +7,20 @@ class Farm
     /*
     *@array Массив животных объектов
     */
-    public $animals = [];
+    public $animals = array();
 
     /*
     *@array Массив продуктов по типам животных
     */
-    public $products = [];
+    public $products = array();
 
-    /*
-    * Создаем животных из массива
-    */
-    public function createAnimals(array $animals)
-    {
-        foreach ($animals as $type => $value){
-            $animalType = $type;
-            $animalCount = $value;
-            for ($i = 1; $i <= $animalCount; $i++){
-                $this->animals[$animalType][] = new $animalType();
-            }
-        }
-    }
+    public $days = array( 'Понедельник' , 'Вторник' , 'Среда' , 'Четверг' , 'Пятница' , 'Суббота' , 'Воскресенье' );
 
+    public $productsDays = [];
     /*
-    * Добавляем животных в массив
+    * Создаем животных из массива или Добавляем животных в массив
     */
-    public function addAnimals(array $animals)
+    public function createOrAddAnimals($animals = array('Cow', 'Chicken'))
     {
         foreach ($animals as $type => $value){
             $animalType = $type;
@@ -50,10 +39,20 @@ class Farm
             $product = 0;
             if(is_array($value) || is_object($value)){
                 foreach ($value as $k => $animal){
-                    $product += $animal->getProducts();
+                    // считаем за каждый день
+                    for ($n = 0;  $n < count($this->days); $n++) {
+                        $products = $animal->getProducts();
+                        $product += $products;
+
+                        if(!isset($this->productsDays[$this->days[$n]][$key])) {
+                            $this->productsDays[$this->days[$n]][$key] = 0;
+                        }
+
+                        $this->productsDays[$this->days[$n]][$key] += $products;
+                    }
                 }
             }
-            $this->products[$key] = $product * 7;
+            $this->products[$key] = $product;
         }
     }
 
@@ -69,6 +68,15 @@ class Farm
     public function toPrintAnimal(){
         echo 'Всего коров ' . count($this->animals["Cow"]) . ' шт.'. PHP_EOL;
         echo 'Всего кур ' . count($this->animals["Chicken"]) . ' шт.'. PHP_EOL;
+    }
+
+    /*
+    * Вывод в консоль за каждый день недели
+    */
+    public function toPrintProductForEachDay(){
+
+        echo 'Всего собрано за каждый день: ' . PHP_EOL;
+        print_r($this->productsDays);
     }
 }
 
@@ -161,7 +169,7 @@ class Chicken extends Animal
 
 
 $factory = new Barn();
-$factory->createAnimals([
+$factory->createOrAddAnimals([
     'Cow' => 10,
     'Chicken' => 20,
 ]);
@@ -169,7 +177,7 @@ $factory->toPrintAnimal();
 $factory->collectionProducts();
 $factory->toPrintProduct();
 
-$factory->addAnimals([
+$factory->createOrAddAnimals([
     'Cow' => 1,
     'Chicken' => 5,
 ]);
@@ -177,3 +185,4 @@ echo 'прикупили животных на рынке "Рога и копы�
 $factory->toPrintAnimal();
 $factory->collectionProducts();
 $factory->toPrintProduct();
+//$factory->toPrintProductForEachDay();
